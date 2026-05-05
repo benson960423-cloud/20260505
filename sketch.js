@@ -107,18 +107,37 @@ function draw() {
     drawLines(face, rightEyeInner, videoW, videoH);
     drawLines(face, leftEyeInner, videoW, videoH);
 
-    // --- D. 繪製嘴唇 ---
-    let lipSets = [
+    // --- D. 繪製特徵細線 (嘴唇與臉頰) ---
+    let featureSets = [
+      // 嘴唇 1
       [409, 270, 269, 267, 0, 37, 39, 40, 185, 61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291],
-      [76, 77, 90, 180, 85, 16, 315, 404, 320, 307, 306, 408, 304, 303, 302, 11, 72, 73, 74, 184]
+      // 嘴唇 2
+      [76, 77, 90, 180, 85, 16, 315, 404, 320, 307, 306, 408, 304, 303, 302, 11, 72, 73, 74, 184],
+      // 右臉頰 (相對於畫面上方)
+      [123, 147, 213, 192, 214],
+      // 左臉頰
+      [352, 376, 433, 416, 434]
     ];
     stroke(255, 0, 0); 
     strokeWeight(1);
-    for (let points of lipSets) {
+    for (let points of featureSets) {
       drawLines(face, points, videoW, videoH);
     }
   }
   pop();
+}
+
+// 輔助函式：根據節點編號陣列繪製連續線條
+function drawLines(face, points, vW, vH) {
+  for (let i = 0; i < points.length - 1; i++) {
+    let p1 = face.keypoints[points[i]];
+    let p2 = face.keypoints[points[i + 1]];
+    let x1 = map(p1.x, 0, capture.width, -vW / 2, vW / 2);
+    let y1 = map(p1.y, 0, capture.height, -vH / 2, vH / 2);
+    let x2 = map(p2.x, 0, capture.width, -vW / 2, vW / 2);
+    let y2 = map(p2.y, 0, capture.height, -vH / 2, vH / 2);
+    line(x1, y1, x2, y2);
+  }
 }
 
 // 當視窗大小改變時，自動調整畫布大小
