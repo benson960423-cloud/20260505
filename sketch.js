@@ -1,4 +1,12 @@
 let capture;
+let faceMesh;
+let faces = [];
+let options = { maxFaces: 1, refineLandmarks: false, flipHorizontal: false };
+
+function preload() {
+  // 載入 ml5 faceMesh 模型
+  faceMesh = ml5.faceMesh(options);
+}
 
 function setup() {
   // 產生一個全螢幕的畫布
@@ -11,6 +19,13 @@ function setup() {
   
   // 設定影像繪製模式為中心
   imageMode(CENTER);
+
+  // 開始偵測臉部
+  faceMesh.detectStart(capture, gotFaces);
+}
+
+function gotFaces(results) {
+  faces = results;
 }
 
 function draw() {
@@ -36,6 +51,29 @@ function draw() {
   
   // 繪製影像，座標設為 (0, 0) 以配合 translate 置中
   image(capture, 0, 0, videoW, videoH);
+
+  // 4. 繪製臉部特定節點連線
+  if (faces.length > 0) {
+    let face = faces[0];
+    let points = [409, 270, 269, 267, 0, 37, 39, 40, 185, 61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291];
+    
+    stroke(255, 0, 0); // 設定線條為紅色
+    strokeWeight(15);   // 設定線條粗細為 15
+    noFill();
+
+    for (let i = 0; i < points.length - 1; i++) {
+      let p1 = face.keypoints[points[i]];
+      let p2 = face.keypoints[points[i + 1]];
+
+      // 將辨識座標映射到畫布中央 50% 大小的影像區域
+      let x1 = map(p1.x, 0, capture.width, -videoW / 2, videoW / 2);
+      let y1 = map(p1.y, 0, capture.height, -videoH / 2, videoH / 2);
+      let x2 = map(p2.x, 0, capture.width, -videoW / 2, videoW / 2);
+      let y2 = map(p2.y, 0, capture.height, -videoH / 2, videoH / 2);
+
+      line(x1, y1, x2, y2);
+    }
+  }
   pop();
 }
 
