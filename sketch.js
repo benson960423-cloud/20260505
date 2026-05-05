@@ -56,17 +56,17 @@ function draw() {
   if (faces.length > 0) {
     let face = faces[0];
     
-    // --- A. 背景遮罩 (填滿輪廓外背景為 fdf0d5) ---
+    // --- A. 背景遮罩 (在影像區域內，將輪廓外填滿 fdf0d5) ---
     fill('#fdf0d5');
     noStroke();
     beginShape();
-    // 外部大框 (覆蓋整個視窗)
-    vertex(-width, -height);
-    vertex(width, -height);
-    vertex(width, height);
-    vertex(-width, height);
+    // 繪製一個蓋住影像範圍的矩形 (相對於中心點)
+    vertex(-videoW / 2, -videoH / 2);
+    vertex(videoW / 2, -videoH / 2);
+    vertex(videoW / 2, videoH / 2);
+    vertex(-videoW / 2, videoH / 2);
     
-    // 內部孔洞 (臉部輪廓反向繪製達成遮罩效果)
+    // 內部孔洞：臉部輪廓 (利用反向繪製達成遮罩)
     let silhouette = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109, 10];
     beginContour();
     for (let i of silhouette) {
@@ -87,49 +87,38 @@ function draw() {
     }
     endShape();
 
-    // --- C. 繪製眼睛 (黑眼圈與內圈) ---
-    // 右眼節點：外圈(247系列), 內圈(246系列)
+    // --- C. 繪製雙眼 ---
+    // 右眼節點：外圈 (247附近), 內圈 (246附近)
     let rightEyeOuter = [226, 247, 30, 29, 28, 27, 190, 244, 233, 232, 231, 230, 229, 228, 31, 226];
     let rightEyeInner = [33, 246, 161, 160, 159, 158, 157, 173, 133, 155, 154, 153, 145, 144, 163, 7, 33];
-    // 左眼節點：外圈(467系列), 內圈(466系列)
+    // 左眼節點：外圈 (467附近), 內圈 (466附近)
     let leftEyeOuter = [463, 467, 260, 259, 258, 257, 414, 464, 453, 452, 451, 450, 449, 448, 261, 463];
     let leftEyeInner = [263, 466, 388, 387, 386, 385, 384, 398, 362, 382, 381, 380, 374, 373, 390, 249, 263];
 
-    // 1. 繪製外圈 (黑眼圈效果)
-    stroke(50, 50, 50); // 灰色偏黑
+    // 1. 繪製黑眼圈 (外圈)
+    stroke(70); // 灰色偏黑
     strokeWeight(15);
     drawLines(face, rightEyeOuter, videoW, videoH);
     drawLines(face, leftEyeOuter, videoW, videoH);
 
-    // 2. 繪製內圈 (紅色細線)
-    stroke(255, 0, 0); 
+    // 2. 繪製眼部內圈
+    stroke(255, 0, 0); // 紅色
     strokeWeight(1);
     drawLines(face, rightEyeInner, videoW, videoH);
     drawLines(face, leftEyeInner, videoW, videoH);
 
-    // --- D. 保留嘴唇畫線部分 ---
+    // --- D. 繪製嘴唇 ---
     let lipSets = [
       [409, 270, 269, 267, 0, 37, 39, 40, 185, 61, 146, 91, 181, 84, 17, 314, 405, 321, 375, 291],
       [76, 77, 90, 180, 85, 16, 315, 404, 320, 307, 306, 408, 304, 303, 302, 11, 72, 73, 74, 184]
     ];
+    stroke(255, 0, 0); 
+    strokeWeight(1);
     for (let points of lipSets) {
       drawLines(face, points, videoW, videoH);
     }
   }
   pop();
-}
-
-// 輔助函式：根據節點陣列繪製連續線條
-function drawLines(face, points, vW, vH) {
-  for (let i = 0; i < points.length - 1; i++) {
-    let p1 = face.keypoints[points[i]];
-    let p2 = face.keypoints[points[i + 1]];
-    let x1 = map(p1.x, 0, capture.width, -vW / 2, vW / 2);
-    let y1 = map(p1.y, 0, capture.height, -vH / 2, vH / 2);
-    let x2 = map(p2.x, 0, capture.width, -vW / 2, vW / 2);
-    let y2 = map(p2.y, 0, capture.height, -vH / 2, vH / 2);
-    line(x1, y1, x2, y2);
-  }
 }
 
 // 當視窗大小改變時，自動調整畫布大小
