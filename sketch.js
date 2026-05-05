@@ -17,6 +17,12 @@ function draw() {
   // 1. 畫布背景顏色設定為 e7c6ff
   background('#e7c6ff');
 
+  // 1.1 顯示文字串
+  fill(0); // 設定文字顏色為黑色
+  textSize(32); // 設定文字大小
+  textAlign(CENTER, CENTER); // 設定水平與垂直置中
+  text("教科414730894", width / 2, height * 0.15); // 顯示在畫布上方 15% 的位置
+
   // 2. 計算影像顯示的寬高 (整個畫布寬高的 50%)
   let videoW = width * 0.5;
   let videoH = height * 0.5;
